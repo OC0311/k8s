@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mysql
+spec:
+  replicas: 3
+  selector:
+    app: mysql
+  # 定义一个模板
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      # 带 "-" 列表
+      - name: mysql
+        image: mysql
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "123456"
