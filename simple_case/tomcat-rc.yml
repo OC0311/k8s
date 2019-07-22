@@ -4,7 +4,7 @@ metadata:
   name: myweb
 spec:
   replicas: 3
-  selector:
+  selec、tor:
     app: myweb
   template:
     metadata:
