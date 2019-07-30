@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+  labels:
+    name: web
+    app: pod
+    version: v1
+spec:
+  # 失败时重启
+  restartPolicy: OnFailure
+  containers:
+    # 镜像拉取方式选择在本地
+    - name:  test-pod
+      # node 选择器 会影响pod 的调度，只会将pod 运行在杭州的Node上
+      nodeSelector:
+        region: hangzhou
+      imagePullPolicy: Never
+      image: pod_demo:v1
+      # 这里并不是真正的暴露端口，而是起一个提示的作用，该容器起暴露了31344端口
+      ports:
+        - containerPort: 31344
+      env:
+        - name: POD_NAME
+          # 从系统信息中获取做为环境变量
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: MYSQL_PASS
+          value: 123456
+      # 健康检查，
+      # 检查失败会重启
+      livenessProbe:
+        httpGet:
+          port: 31344
+          path: /ping
+      # 预备检查如果没有启动的话，services 是不会把流量切到这个pod 上的
+      readinessProbe:
+        httpGet:
+          port: 31344
+          path: /ping
+      # pod 的钩子操作
+      lifecycle:
+        # 容器启动后立即执行如果失败会被杀死，会根据重启策略
+        postStart:
+          httpGet:
+            port: 31344
+            path: /ping
+        # 容器结束前执行，用于退出清理操作，
+        preStop:
+          httpGet:
+            port: 31344
+            path: /ping
+      # 资源申请和资源限制
+      resources:
+        # request 用于调度时 会根据资源的最低要求调度到合适的node 上
+        # Mi = 1024*1024   M = 1000*1000
+        # m = 300 等于千分之3 秒
+        requests:
+          cpu: "200m"
+          memory: "256Mi"
+        # 运行时 的限制
+        limit:
+          memory: "256Mi"
+          cpu: "200m"
