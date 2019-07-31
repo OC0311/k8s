@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-job
+spec:
+  # 并行个数
+  parallelism: 2
+  # 执行次数
+  completions: 1
+  template:
+    metadata:
+      name: job-pod
+      labels:
+        name: job
+    spec:
+      # job 不支持无故重启
+      restartPolicy: Never
+      nodeSelector:
+        region: hangzhou
+      containers:
+        - name: job
+          image: job:v1
+          imagePullPolicy: Never
