@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  labels:
+    name: test-deploymnet
+spec:
+  replicas: 3
+  minReadySeconds: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      name: web
+  template:
+    metadata:
+      name: replicate
+      labels:
+        name: web
+    spec:
+      # node 选择器 会影响pod 的调度，只会将pod 运行在杭州的Node上
+      nodeSelector:
+        region: hangzhou
+        # 失败时重启
+      restartPolicy: Always
+      containers:
+        # 镜像拉取方式选择在本地
+        - name:  web
+          imagePullPolicy: Never
+          image: test_web:v1
+          # 这里并不是真正的暴露端口，而是起一个提示的作用，该容器起暴露了31344端口
+          ports:
+            - containerPort: 31344
+          resources:
+            # request 用于调度时 会根据资源的最低要求调度到合适的node 上
+            # Mi = 1024*1024   M = 1000*1000
+            # m = 300 等于千分之3 秒
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            # 运行时 的限制
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
