@@ -9,12 +9,12 @@ metadata:
 spec:
   # 失败时重启
   restartPolicy: OnFailure
+  # node 选择器 会影响pod 的调度，只会将pod 运行在杭州的Node上
+  nodeSelector:
+    region: hangzhou
   containers:
     # 镜像拉取方式选择在本地
     - name:  test-pod
-      # node 选择器 会影响pod 的调度，只会将pod 运行在杭州的Node上
-      nodeSelector:
-        region: hangzhou
       imagePullPolicy: Never
       image: pod_demo:v1
       # 这里并不是真正的暴露端口，而是起一个提示的作用，该容器起暴露了31344端口
@@ -27,7 +27,8 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: MYSQL_PASS
-          value: 123456
+          # 必须要使用引号
+          value: "123456"
       # 健康检查，
       # 检查失败会重启
       livenessProbe:
@@ -60,6 +61,6 @@ spec:
           cpu: "200m"
           memory: "256Mi"
         # 运行时 的限制
-        limit:
+        limits:
           memory: "256Mi"
           cpu: "200m"
