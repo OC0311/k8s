@@ -21,10 +21,8 @@ spec:
       labels:
         name: web
     spec:
-      # node 选择器 会影响pod 的调度，只会将pod 运行在杭州的Node上
-      nodeSelector:
-        region: hangzhou
-        # 失败时重启
+
+      # 失败时重启
       restartPolicy: Always
       containers:
         # 镜像拉取方式选择在本地

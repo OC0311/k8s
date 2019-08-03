@@ -8,18 +8,19 @@ spec:
   ports:
   - port: 31344
     protocol: TCP
+    nodePort: 31344
     targetPort: 31344
   selector:
-    run: daemon
+    name: web
   sessionAffinity: None
-  type: ClusterIP
+  type: NodePort
 ---
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
-  name: daemon
+  name: deployment
   labels:
-    name: daemon
+    name: deployment
 spec:
   minReadySeconds: 3
   # 更新策略
@@ -33,15 +34,13 @@ spec:
         name: web
     spec:
       # node 选择器 会影响pod 的调度，只会将pod 运行在杭州的Node上
-      nodeSelector:
-        region: hangzhou
         # 失败时重启
       restartPolicy: Always
       containers:
         # 镜像拉取方式选择在本地te
         - name:  web
           imagePullPolicy: Never
-          image: test_web:v1
+          image: web_backend:v1
           # 这里并不是真正的暴露端口，而是起一个提示的作用，该容器起暴露了31344端口
           ports:
             - containerPort: 31344
