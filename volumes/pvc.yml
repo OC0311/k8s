@@ -1,4 +1,39 @@
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc
+spec:
+  resources:
+    # 申请资源
+    requests:
+      storage: 1Gi
+  accessModes:
+    # 只有一个可读写
+  - ReadWriteOnce
+    # 文件系统（文件和快设备）
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv
+  labels:
+    # 让pvc 有选择
+    type: ssd
+spec:
+  capacity:
+    # 定义容量
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  # 回收不会清掉卷
+  persistentVolumeReclaimPolicy: Retain
+  # 使用hostpath 作为底层的存储
+  hostPath:
+    path: "/opt/volume"
+    type: "DirectoryOrCreate"
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: nginx-service
@@ -42,39 +77,3 @@ spec:
     - name: html
       persistentVolumeClaim:
         claimName: pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvc
-spec:
-  resources:
-    # 申请资源
-    requests:
-      storage: 1Gi
-  accessModes:
-    # 只有一个可读写
-  - ReadWriteOnce
-    # 文件系统（文件和快设备）
-  volumeMode: Filesystem
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv
-  labels:
-    # 让pvc 有选择
-    type: ssd
-spec:
-  capacity:
-    # 定义容量
-    storage: 1Gi
-  accessModes:
-    - ReadOnlyMany
-    - ReadWriteMany
-  # 回收不会清掉卷
-  persistentVolumeReclaimPolicy: Retain
-  # 使用hostpath 作为底层的存储
-  hostPath:
-    path: "/opt/volume"
-    type: "DirectoryOrCreate"
