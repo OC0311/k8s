@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ebcgateway
+  labels:
+    name: backend
+spec:
+  ports:
+  - port: 31344
+    protocol: TCP
+    nodePort: 31344
+    targetPort: 31344
+  selector:
+    name: web
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+  labels:
+    name: deployment
+spec:
+  minReadySeconds: 3
+  # 更新策略
+  selector:
+    matchLabels:
+      name: web
+  template:
+    metadata:
+      name: daemon
+      labels:
+        name: web
+    spec:
+      # node 选择器 会影响pod 的调度，只会将pod 运行在杭州的Node上
+        # 失败时重启
+      restartPolicy: Always
+      containers:
+        # 镜像拉取方式选择在本地te
+        - name:  web
+          imagePullPolicy: Always
+          image: rjjrjj1013/web_backend:v1
+          # 这里并不是真正的暴露端口，而是起一个提示的作用，该容器起暴露了31344端口
+          ports:
+            - containerPort: 31344

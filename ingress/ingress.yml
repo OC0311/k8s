@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata: 
+  name: ingress
+spec:
+  rules:
+  - host: ebcgateway.com
+    http:
+      paths:
+      - path: /ebc
+        backend:
+          serviceName: ebcgateway
+          servicePort: 31344

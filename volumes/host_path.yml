@@ -41,7 +41,7 @@ spec:
   volumes:
     - name: html
       hostPath:
-        path: /test
+        path: /opt/web/html
         # 目录不存在则创建
         # 还支持文件或者socket 类型
-        type: "Directory"
+        type: "DirectoryOrCreate"

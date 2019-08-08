@@ -5,15 +5,16 @@ metadata:
   labels:
     name: backend
 spec:
+#  clusterIP: "None"
   ports:
   - port: 31344
     protocol: TCP
-    nodePort: 31344
+#    nodePort: 31344
     targetPort: 31344
   selector:
     name: web
   sessionAffinity: None
-  type: NodePort
+#  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -39,8 +40,8 @@ spec:
       containers:
         # 镜像拉取方式选择在本地te
         - name:  web
-          imagePullPolicy: Never
-          image: web_backend:v1
+          imagePullPolicy: Always
+          image: rjjrjj1013/web_backend:v1
           # 这里并不是真正的暴露端口，而是起一个提示的作用，该容器起暴露了31344端口
           ports:
             - containerPort: 31344

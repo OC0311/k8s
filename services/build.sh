@@ -10,7 +10,7 @@ function buildWeb(){
 
 function buildImage(){
 	cd ./rootf/
-	docker build -t web_backend:v1 .
+	docker build -t rjjrjj1013/web_backend:v1 .
 }
 
 ##########################################
