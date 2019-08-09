@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  password: "root123"
+  user: "root"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config
+spec:
+  containers:
+    - image: busybox:latest
+      imagePullPolicy: IfNotPresent
+      name: tool
+      env:
+      - name: USER
+        valueFrom:
+          configMapKeyRef:
+            name: config
+            key: user
+      - name: PASSWORD
+        valueFrom:
+          configMapKeyRef:
+            name: config
+            key: password
+      command: ["/bin/sh"]
+      args: ["-c", "sleep 6000"]
