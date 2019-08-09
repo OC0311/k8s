@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config
+data:
+  mysql.json: |
+    {
+      "MYSQL_PASS_WORD": "123456"
+      "MYSQL_USER": "root"
+    }
+  redis.json: |
+    {
+      "REDIS_PASS_WORD": "123456"
+      "REDIS_USER": "redis"
+    }
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config
+spec:
+
+  containers:
+    - image: busybox:latest
+      imagePullPolicy: IfNotPresent
+      name: tool
+      command: ["/bin/sh"]
+      args: ["-c", "sleep 6000"]
+      volumeMounts:
+        - name: config-volumes
+          # 会在挂在目录下生成以key 为文件名 value 为内容的配置文件
+          # 该路径下如果有已存在的文件
+          # 使用了subPath这里就相当于预挂载
+          mountPath: /test/config/mysql.json
+          # subPath 用于筛选文件
+          # 可以将文件夹的一部分进行挂载，从而不影响其他的文件，否则其他的文件会被隐藏
+          # 使用相对路径
+          subPath:  mysql.json
+          # 数据敏感的要保证只读
+          # readOnly: false
+  volumes:
+    - name: config-volumes
+      # configmap 的文件夹 为只读
+      configMap:
+        name: config
+        # 这是里面文件的权限，不是
+        defaultMode: 0777
+        items:
+          # 指定需要生成文件的key
+          # 如果不指定key 那么所有的key都会生成对应的文件
+          - key: mysql.json
+            # 生成的文件名
+            path: mysql.json

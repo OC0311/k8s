@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+  # 这里会自动加上前缀  在容器的环境变量中
+  USER: "root"
+  PASSWROD: "1234567"
+  DATABASES: "wechat"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: config
+spec:
+  containers:
+    - image: busybox:latest
+      imagePullPolicy: IfNotPresent
+      name: tool
+      env:
+        - name: USER
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              # 适合非常大的value 比如tls 证书一类的
+              # 直接使用文件名作为key
+              key: user.cfg
+              # 表示可选 true表示即使 key 不存在也会正常启动
+              optional: true
+      envFrom:
+        - prefix: MYSQL_
+          configMapRef:
+            name: mysql-config
+      command: ["/bin/sh"]
+      # 可以直接将配置传入参数
+      # 格式为 args: ["$(MYSQL_USER)"]
+      args: ["-c", "sleep 6000"]
