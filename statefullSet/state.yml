@@ -1,0 +1,56 @@
+# headless
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless
+spec:
+  clusterIP: None
+  selector:
+    type: stateful
+  ports:
+    # headless 的作用只是用来选择那些pod
+    - port: 31344
+      protocol: TCP
+      targetPort: 31344
+  sessionAffinity: None
+# stateFull
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: stateful
+spec:
+  serviceName: headless
+  replicas: 3
+  selector:
+    matchLabels:
+      type: stateful
+  template:
+    metadata:
+      name: stateful-app
+      labels:
+        type: stateful
+    spec:
+      containers:
+        - name: stateful
+          image: stateful:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 31344
+              name: http
+          volumeMounts:
+          # pvc 模板的名称
+            - name: data
+              mountPath: /opt/database/
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: data
+      spec:
+        storageClassName: fake-nfs
+        resources:
+          requests:
+            storage: 1Gi
+        accessModes:
+          - ReadWriteOnce
