@@ -1,3 +1,54 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-1
+  labels:
+    type: ssd
+spec:
+  storageClassName: fake-nfs
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  hostPath:
+    path: "/opt/volume/v1"
+    type: "DirectoryOrCreate"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-2
+  labels:
+    type: ssd
+spec:
+  storageClassName: fake-nfs
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  hostPath:
+    path: "/opt/volume/v2"
+    type: "DirectoryOrCreate"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-3
+  labels:
+    type: ssd
+spec:
+  storageClassName: fake-nfs
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  hostPath:
+    path: "/opt/volume/v3"
+    type: "DirectoryOrCreate"
+---
 # headless
 apiVersion: v1
 kind: Service
@@ -13,6 +64,25 @@ spec:
       protocol: TCP
       targetPort: 31344
   sessionAffinity: None
+
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  name: service
+spec:
+  type: NodePort
+  selector:
+    type: stateful
+  ports:
+    # headless 的作用只是用来选择那些pod
+    - port: 31344
+      protocol: TCP
+      nodePort: 31344
+      targetPort: 31344
+  sessionAffinity: None
+
 # stateFull
 ---
 apiVersion: apps/v1
@@ -35,6 +105,11 @@ spec:
         - name: stateful
           image: stateful:v1
           imagePullPolicy: Never
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
           ports:
             - containerPort: 31344
               name: http

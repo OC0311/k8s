@@ -21,26 +21,32 @@ func main(){
 }
 
 func Add(w http.ResponseWriter, r *http.Request) {
-	f, err := os.Open("/opt/database/data.kv")
+	f, err := os.OpenFile("/opt/database/data.kv", os.O_CREATE, 0777)
 	if err != nil{
+		fmt.Println(err)
 		log.Panic("add()# open file panic")
 	}
 
 	defer  f.Close()
 	value := fmt.Sprintf("value:%s\n", time.Now().String())
 	_, _ = f.Write([]byte(value))
-	_, _ = w.Write([]byte("add ok!"))
+	podName :=  os.Getenv("POD_NAME")
+	resp := fmt.Sprintf("%s: add ok!", podName)
+	_, _ = w.Write([]byte(resp))
 }
 
 func Get (w http.ResponseWriter, r *http.Request) {
-	f, err := os.Open("/opt/database/data.kv")
+	f, err := os.OpenFile("/opt/database/data.kv", os.O_CREATE, 0777)
 	if err != nil{
+		fmt.Println(err)
 		log.Panic("get()# open file panic")
 	}
 
 	defer  f.Close()
 	result := make([]byte, 1024)
+
 	_, _ = f.Read(result)
+	fmt.Println(string(result))
 	_, _ = w.Write(result)
 }
 
