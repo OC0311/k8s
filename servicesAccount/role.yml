@@ -1,0 +1,49 @@
+# 创建角色
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: foo
+  name: service-reader
+rules:
+  # 资源组: 资源组比如 deployment extensions的 .service 是核心组(v1)的所以为""
+  # 可以使用kubectl explain xxx 来查看
+  - apiGroups: [""]
+    # 行为
+    verbs: ["get", "list"]
+    # 对象
+    resources: ["services"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: bar
+  name: service-reader
+rules:
+  - apiGroups: [""]
+    # 行为
+    verbs: ["get", "list"]
+    # 对象
+    resources: ["services"]
+---
+# 创建角色绑定，将角色和serviceaccount的方式来赋予账户更多的权限
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: foo-service
+  namespace: foo
+# 引用那个角色
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: service-reader
+# 需要绑定角色的serviceAccount
+subjects:
+  # 绑定到另一个命名空间的account 上
+  # 意识是把读取service-reader 给某个account
+  # 可以在foo 和 bar 的命名空间中访问foo 的 service
+  - kind: ServiceAccount
+    name: default
+    namespace: bar
+  - kind: ServiceAccount
+    name: default
+    namespace: foo

@@ -1,0 +1,36 @@
+#ClusterRole 专门控制集群的数据（资源或非资源数据）
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pv-reader
+rules:
+ - apiGroups:
+    - ""
+   resources:
+    - persistentvolumes
+    - pods
+   verbs:
+     - get
+     - list
+---
+# 和account 进行绑定
+# 和ClusterRoleBinding 绑定就可以访问所有命名空间下的所有信息
+# 假如我们需要限定只能访问某一个命名空间下的资源可以和
+# RoleBinding 进行绑定
+apiVersion: rbac.authorization.k8s.io/v1
+
+# kind: RoleBinding
+# 绑定cluster 就应该使用ClusterRoleBinding 而不是RoleBinding
+# 否则是无效的绑定
+kind: RoleBinding
+metadata:
+  name: foo-pv
+# 引用那个角色
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pv-reader
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: foo
