@@ -1,0 +1,41 @@
+# 需要在apiserver 开启扩展参数 apiserver.enable-admission-plugins = PodSecurityPolicy
+
+# 相对宽松的策略
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: open
+spec:
+  hostIPC: true
+  hostPID: true
+  hostPorts:
+    - min: 10000
+      max: 65535
+  seLinux:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+---
+# 相对严格的策略
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: close
+spec:
+  hostIPC: false
+  hostPID: false
+  hostPorts:
+    - min: 30000
+      max: 40000
+  seLinux:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny

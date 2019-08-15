@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-host-network
+spec:
+  # 表示和宿主机使用同一个网络名称空间
+  # hostNetwork: true
+  # 和宿主机共享相同的PID
+  hostPID: false
+  # 希望和宿主机共享进程内通讯
+  # 使用kc exec pod-with-host-network  -c sidecar ps aux命令可以查看到宿主机的PID
+  hostIPC: true
+  containers:
+    - name: sidecar
+      image: alpine
+      command: ["/bin/sleep", "999999"]
+      securityContext:
+        # 设置运行用户，如果 设置为0（root） 用户的话
+        # 由于下面的NonRoot 参数是无法运行的
+        runAsUser: 405
+        # 允许非root用户运行
+        runAsNonRoot: true
+        # 特权模式运行,可以看到更多设备文件
+        # 通过ls /dev就可以对比出区别
+        privileged: true
+        # 添加或删除内核功能
+        capabilities:
+          # 为容器添加了内核功能
+          add:
+            - SYS_TIME # 可以对时间进行修改
+          # 为容器删除了内核功能
+          drop:
+            - CHOWN  # 禁止了容器修改文件的所有者
+          # 禁止用户写入根目录
+        readOnlyRootFilesystem: true
+
+    - name: main
+      image: nginx:latest
+      ports:
+        # 直接和宿主机的8080 端口绑定
+        - containerPort: 80
+          # 不使用共享的网络空间
+          # 而是想主机暴露一个端口
+          # 这些端口只会向运行了这些pod 的主机暴露
+          # 而service是直接暴露所有的
+          hostPort: 8080
+          protocol: TCP

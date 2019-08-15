@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: requests-pod
+spec:
+  containers:
+    - image: busybox
+#      command: ["dd", "if=/dev/zero", "of=/dev/null"]
+      name: main
+      resources:
+        # 如果超过了limitRange 设置会被阻止
+        requests:
+          cpu: "200m"
+          memory: "200Mi"
+        limits:
+          # 当只设置了limits那么request 就会和limit 一样
+          # 关于qos 级别
+          # 当request 和limit都没设置时qos服务质量最低
+          # 当request 比limit 低时服务质量为中
+          # 当request 和limit 一样时服务质量最高
+          # 服务质量越高就以为着，当集群因为资源不够需要驱逐pod 时就会先驱逐 服务质量低的
+          cpu: "200m"
+          memory: "256Mi"
